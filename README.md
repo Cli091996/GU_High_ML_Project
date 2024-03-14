@@ -2,16 +2,19 @@
 to be updated
 
 misc 
+
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 
 # Assuming actual2, predicted2, errors2, and order_type are predefined lists or arrays
-actual2 = actual2
-predicted2 = predicted2
-errors2 = errors2  # Make sure you have defined errors2 somewhere in your code
-order_type = order_type
+# For demonstration, let's create some dummy data
+np.random.seed(42)  # For reproducible results
+actual2 = np.random.rand(100) * 100
+predicted2 = actual2 + np.random.normal(0, 10, 100)  # Adding some noise
+errors2 = np.random.rand(100) * 10
+order_type = np.random.choice(['Buy', 'Sell', 'Hold'], 100)
 
 df = pd.DataFrame({'Actual': actual2, 'Predicted': predicted2, 'Error': errors2, 'OrderType': order_type})
 
@@ -23,66 +26,52 @@ fig = px.scatter(df, x='Actual', y='Predicted', color='OrderType', opacity=0.5,
                  labels={'Actual': 'Actual Values', 'Predicted': 'Predicted Values'},
                  title=base_title)
 
-# Adding error lines using iterrows
+# Adding error lines for each point
+error_shapes = []
 for index, row in df.iterrows():
-    fig.add_shape(
-        go.layout.Shape(
+    error_shapes.append(
+        dict(
             type="line",
             x0=row['Actual'],
             y0=row['Predicted'],
             x1=row['Actual'],
-            y1=row['Actual'] + row['Error'],
-            line=dict(color='red', width=1, dash='solid'),
+            y1=row['Predicted'] + row['Error'],
+            line=dict(color='red', width=1),
+            visible=False  # Initially set all error bars to invisible
         )
     )
 
-# Add error trend on secondary y-axis
-fig.add_trace(
-    go.Scatter(
-        x=df['Actual'],
-        y=df['Error'],
-        mode='lines',
-        line=dict(dash='dot', color='red', width=.0001),
-        marker=dict(color='red', size=1, opacity=0.1),
-        yaxis='y2',
-        name='Errors Trend',
-        visible=False  # Ensure the trendline is initially hidden
-    )
-)
+fig.update_layout(shapes=error_shapes)
 
 # Dropdown menus
 order_types = df['OrderType'].unique()
-dropdown_buttons = [
-    dict(label='All',
-         method='update',
-         args=[{'visible': True] * (len(df) + 1) + [False] * len(order_types) * 2,
-               {'title': f'{base_title} - All Order Types', 'yaxis2.title': 'Error', 'yaxis2.overlaying': 'y', 'yaxis2.side': 'right'}])
-]
+dropdown_buttons = []
 
-# New code to handle visibility based on selected order type
 for ot in order_types:
-    # Create a filtered DataFrame for this order type
-    df_filtered = df[df['OrderType'] == ot]
-
-    # Define visibility for scatter points and error lines
-    visible = [True] * len(df_filtered) + [
-        False for _ in range(len(df) - len(df_filtered))
-    ] * 2
-
-    # Define visibility for error trendline (only for "Sell" type)
-    errors_trend_visibility = (ot == "Sell")
-
+    # This determines which scatter points are visible based on the order type
+    scatter_visibility = [(row['OrderType'] == ot) for _, row in df.iterrows()]
+    # Now we need to adjust the visibility of error bars alongside scatter points
+    error_visibility = [(row['OrderType'] == ot) for _, row in df.iterrows()]
+    # Combine scatter and error bar visibility
+    combined_visibility = scatter_visibility + error_visibility
+    
     dropdown_buttons.append(
         dict(label=ot,
              method='update',
-             args=[{'visible': visible},
-                   {'title': f'{base_title} - Order Type: {ot}',
-                    'yaxis2.title': 'Error',
-                    'yaxis2.overlaying': 'y',
-                    'yaxis2.side': 'right'}])
+             args=[{'visible': combined_visibility},
+                   {'title': f'{base_title} - Order Type: {ot}'}])
     )
 
-# Update layout with dropdown and ensure the secondary Y-axis is correctly configured
+# Adding a button for showing all data points and their error bars
+all_visibility = [True] * len(df) * 2  # First part for scatter points, second part for error bars
+dropdown_buttons.insert(
+    0, dict(label='All',
+            method='update',
+            args=[{'visible': all_visibility},
+                  {'title': f'{base_title} - All Order Types'}])
+)
+
+# Update layout with dropdown
 fig.update_layout(
     updatemenus=[
         dict(
@@ -95,14 +84,7 @@ fig.update_layout(
             y=1.15,
             yanchor="top"
         ),
-    ],
-    yaxis2=dict(
-        title='Error',
-        overlaying='y',
-        side='right',
-        showgrid=False,
-        showticklabels=True,
-    )
+    ]
 )
 
 fig.show()
