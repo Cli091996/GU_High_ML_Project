@@ -1,18 +1,6 @@
 # GU_High_ML_Project
 to be updated
 
-misc 
-import plotly.express as px
-import plotly.graph_objects as go
-import numpy as np
-import pandas as pd
-
-# Assuming actual2, predicted2, errors2, and order_type are predefined lists or arrays
-actual2 = actual2
-predicted2 = predicted2
-errors2 = errors2  # Assuming errors2 is defined
-order_type = order_type
-
 df = pd.DataFrame({'Actual': actual2, 'Predicted': predicted2, 'Error': errors2, 'OrderType': order_type})
 
 # Define your base title here
@@ -37,8 +25,7 @@ for index, row in df.iterrows():
         type="line",
         x0=row['Actual'], y0=row['Predicted'],
         x1=row['Actual'], y1=row['Predicted'] + row['Error'],
-        line=dict(color=color_mapping[row['OrderType']], width=1),
-        visible='legendonly'  # Error lines are initially hidden
+        line=dict(color=color_mapping[row['OrderType']], width=1)
     )
 
 # Use this section if you want to keep the error trend line (adjust as necessary)
@@ -74,5 +61,3 @@ fig.update_layout(
 )
 
 fig.show()
-
-Google Pixel 6 Pro
