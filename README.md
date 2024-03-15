@@ -15,3 +15,25 @@ to be updated
             axs.scatter(actual[idx], predicted[idx], alpha=0.5, color=color_dict[selected_order_type], label=selected_order_type)
             axs.vlines(actual[idx], predicted[idx], actual[idx], color=color_dict[selected_order_type], alpha=0.7, linewidth=0.5)
     
+
+# To edit 
+#%%html
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener('mouseup', function(event) {
+        var selection = window.getSelection().toString();
+        if(selection.trim() !== '') {
+            var cells = document.querySelectorAll('.jp-CodeCell');
+            cells.forEach(function(cell) {
+                var textNodes = cell.querySelectorAll('.CodeMirror-line span');
+                textNodes.forEach(function(node) {
+                    var text = node.textContent.trim();
+                    if(text === selection) {
+                        node.style.background = 'red'; // Change to suit
+                    }
+                });
+            });
+        }
+    });
+});
+</script>
