@@ -4,3 +4,58 @@
 <style>
 .CodeMirror-focused .CodeMirror-selected { background: red; } // change to suit
 </style>
+
+#Create Dynamic Visual with one Filter Options 
+import numpy as np
+import matplotlib.pyplot as plt
+import ipywidgets as widgets
+import random
+from IPython.display import display
+
+sample = 20000
+actual = np.random.randint(1, 500, sample)
+predicted = np.random.randint(1, 500, sample)
+# Ensure order_type is a NumPy array for element-wise comparison
+order_type = np.array([random.choice(['BUY', 'SELL']) for _ in range(sample)])
+
+# Calculate errors
+errors = actual - predicted
+
+# Determine unique order types and assign colors
+unique_order_types = np.unique(order_type)
+colors = plt.cm.jet(np.linspace(0, 1, len(unique_order_types)))
+color_dict = dict(zip(unique_order_types, colors))
+
+def plot_filtered_data(selected_order_type='All'):
+    fig, axs = plt.subplots(figsize=(16, 9))
+    
+    if selected_order_type == 'All':
+        for order in unique_order_types:
+            idx = order_type == order
+            axs.scatter(actual[idx], predicted[idx], alpha=0.5, color=color_dict[order], label=order)
+            axs.vlines(actual[idx], predicted[idx], actual[idx], color=color_dict[order], alpha=0.7, linewidth=0.5)
+    else:
+        idx = order_type == selected_order_type
+        axs.scatter(actual[idx], predicted[idx], alpha=0.5, color=color_dict[selected_order_type], label=selected_order_type)
+        axs.vlines(actual[idx], predicted[idx], actual[idx], color=color_dict[selected_order_type], alpha=0.7, linewidth=0.5)
+    
+    axs.set_xlabel('Actual Values', fontsize=14, color='blue')
+    axs.set_ylabel('Predicted Values', fontsize=14, color='blue')
+    axs.tick_params(axis='both', which='major', labelsize=12, colors='green')
+    axs.set_title('Model Prediction vs Actuals with Error Visualization', fontsize=16, color='purple')
+    
+    # Errors plotted on a secondary y-axis
+    ax3 = axs.twinx()
+    ax3.set_ylabel('Error', color='red', fontsize=14)
+    ax3.tick_params(axis='y', labelcolor='red', labelsize=12)
+    if selected_order_type != 'All':
+        ax3.scatter(actual[idx], errors[idx], color='red', alpha=0.5, label='Error')
+    axs.legend(loc='upper left', fontsize=12)
+    
+    fig.patch.set_facecolor('white')
+    plt.tight_layout()
+    plt.show()
+
+# Widget setup
+dropdown_order_type = widgets.Dropdown(options=['All'] + list(unique_order_types), value='All', description='Order Type:')
+widgets.interactive(plot_filtered_data, selected_order_type=dropdown_order_type)
