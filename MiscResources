@@ -1,0 +1,6 @@
+# How to highlight sellected content in Cells in Jupyter Lab 
+
+%%html
+<style>
+.CodeMirror-focused .CodeMirror-selected { background: red; } // change to suit
+</style>
